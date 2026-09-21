@@ -63,7 +63,7 @@ Window {
             i++
         }
     }
-    Connections{
+    /*Connections{
         target: qmlErrorLogger
         onMessagesChanged:{
             if(Qt.platform.os==='linux' && app.enableQmlErrorLog && apps.dev && ap){
@@ -72,7 +72,7 @@ Window {
                 log.text+=''+qmlErrorLogger.messages[qmlErrorLogger.messages.length-1]+'<br>'
             }
         }
-    }
+    }*/
 
     Item{
         id: xApp

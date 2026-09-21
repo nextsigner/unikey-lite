@@ -1,1 +1,1 @@
-Se sube todo
+Se probó en Lubuntu y funcionó correctamente

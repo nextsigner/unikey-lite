@@ -1,48 +1,49 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QDebug>
 
 #include "ul.h"
 #include "qmlclipboardadapter.h"
 
-
 int main(int argc, char *argv[])
 {
-    QQmlApplicationEngine engine;
+    // 1. Establecer atributos antes de crear la aplicación
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-
+    // 2. Instanciar QGuiApplication PRIMERO
     QGuiApplication app(argc, argv);
+
+    // 3. Instanciar el motor QML DESPUÉS de la aplicación
+    QQmlApplicationEngine engine;
+
     UL u;
     u.setEngine(&engine);
 
-    //-->Preset App Name
-    QByteArray presetFilePath="";
+    //--> Preset App Name
+    QByteArray presetFilePath = "";
     presetFilePath.append(qApp->applicationDirPath());
     presetFilePath.append("/preset");
 
-    QString presetAppName="";
-    if(u.fileExist(presetFilePath)){
+    QString presetAppName = "";
+    if (u.fileExist(presetFilePath)) {
         presetAppName.append(u.getFile(presetFilePath));
-        presetAppName=presetAppName.replace("\n", "");
-    }else{
-        presetAppName.append("UniKey");    }
+        presetAppName = presetAppName.replace("\n", "");
+    } else {
+        presetAppName.append("UniKey");
+    }
 
-    qDebug()<<"Runing "<<presetAppName<<"...";
-    //<--Preset App Name
+    qDebug() << "Running " << presetAppName << "...";
+    //<-- Preset App Name
 
-    //Clipboard function for GNU/Linux, Windows and Macos
+    // Clipboard function for GNU/Linux, Windows and macOS
 #ifndef Q_OS_ANDROID
     QmlClipboardAdapter clipboard;
 #endif
 
     qmlRegisterType<UL>("unik.Unik", 1, 0, "Unik");
-    //<--Register Types
     qmlRegisterType<UnikQProcess>("unik.UnikQProcess", 1, 0, "UnikQProcess");
 
-
-
-
-    //-->Set Unik Version
+    //--> Set Unik Version
     QString nv;
     QByteArray fvp;
 #ifdef Q_OS_ANDROID
@@ -54,38 +55,36 @@ int main(int argc, char *argv[])
     nv = u.getFile(fvp);
     nv = QString(nv).replace("\n", "");
     app.setApplicationVersion(nv);
-    //<--Set Unik Version
+    //<-- Set Unik Version
+
     app.setApplicationDisplayName(presetAppName);
     app.setApplicationName(presetAppName);
     app.setOrganizationDomain("unikode.org");
 
-    //-->Set engine properties
+    //--> Set engine properties
     engine.rootContext()->setContextProperty("engine", &engine);
     engine.rootContext()->setContextProperty("u", &u);
     engine.rootContext()->setContextProperty("presetAppName", presetAppName);
-    //<--Set engine properties
 
-
+#ifndef Q_OS_ANDROID
     engine.rootContext()->setContextProperty("clipboard", &clipboard);
+#endif
+    //<-- Set engine properties
 
-
-
-    //-->Set Import Path
-    QByteArray ip="";
+    //--> Set Import Path
+    QByteArray ip = "";
     ip.append(qApp->applicationDirPath());
     ip.append("/modules");
     engine.addImportPath(ip);
     engine.addImportPath("./modules");
     engine.addImportPath("qrc:/modules");
-    //<--Set Import Path
-
-    //QDir::setCurrent(u.getPath(4));
+    //<-- Set Import Path
 
     engine.rootContext()->setContextProperty("argtitle", presetAppName);
     for (int i = 0; i < argc; ++i) {
         QString arg;
         arg.append(argv[i]);
-        if(arg.contains("-title=")){
+        if (arg.contains("-title=")) {
             engine.rootContext()->setContextProperty("argTitle", arg);
         }
     }
@@ -96,6 +95,7 @@ int main(int argc, char *argv[])
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
+
     engine.load(url);
 
     return app.exec();
